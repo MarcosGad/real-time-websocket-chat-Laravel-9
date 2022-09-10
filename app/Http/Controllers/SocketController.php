@@ -1,0 +1,42 @@
+<?php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Ratchet\MessageComponentInterface;
+use Ratchet\ConnectionInterface;
+use App\Models\User;
+use App\Models\Chat;
+use App\Models\Chat_request;
+use Auth;
+
+class SocketController extends Controller implements MessageComponentInterface
+{
+    protected $clients;
+
+    public function __construct()
+    {
+        $this->clients = new \SplObjectStorage;
+    }
+
+    public function onOpen(ConnectionInterface $conn)
+    {
+        $this->clients->attach($conn);
+    }
+
+    public function onMessage(ConnectionInterface $conn, $msg)
+    {
+
+    }
+
+    public function onClose(ConnectionInterface $conn)
+    {
+        $this->clients->detach($conn);
+    }
+
+    public function onError(ConnectionInterface $conn, \Exception $e)
+    {
+        echo "An error has occurred: {$e->getMessage()} \n";
+
+        $conn->close();
+    }
+}
