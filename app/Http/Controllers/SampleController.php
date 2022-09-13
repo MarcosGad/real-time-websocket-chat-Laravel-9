@@ -49,6 +49,9 @@ class SampleController extends Controller
 
         if(Auth::attempt($credentials))
         {
+            $token = md5(uniqid());
+            User::where('id', Auth::id())->update([ 'token' => $token ]);
+
             return redirect('dashboard');
         }
 

@@ -21,6 +21,15 @@ class SocketController extends Controller implements MessageComponentInterface
     public function onOpen(ConnectionInterface $conn)
     {
         $this->clients->attach($conn);
+
+        $querystring = $conn->httpRequest->getUri()->getQuery();
+
+        parse_str($querystring, $queryarray);
+
+        if(isset($queryarray['token']))
+        {
+            User::where('token', $queryarray['token'])->update([ 'connection_id' => $conn->resourceId ]);
+        }
     }
 
     public function onMessage(ConnectionInterface $conn, $msg)
@@ -31,6 +40,15 @@ class SocketController extends Controller implements MessageComponentInterface
     public function onClose(ConnectionInterface $conn)
     {
         $this->clients->detach($conn);
+
+        $querystring = $conn->httpRequest->getUri()->getQuery();
+
+        parse_str($querystring, $queryarray);
+
+        if(isset($queryarray['token']))
+        {
+            User::where('token', $queryarray['token'])->update([ 'connection_id' => 0 ]);
+        }
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)

@@ -20,13 +20,13 @@
 
 <script>
 
-	var conn = new WebSocket('ws://127.0.0.1:8090/');
+	var conn = new WebSocket('ws://127.0.0.1:8090/?token={{ auth()->user()->token }}');
 	
-	conn.onopen = function(e){	
+	conn.onopen = function(e){
 		console.log("Connection established!");
 	};
-	
-	conn.onmessage = function(e){
+
+	conn.onmessage = function(e){	
 	
 	};
 	
