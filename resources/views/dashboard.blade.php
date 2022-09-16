@@ -33,7 +33,7 @@
 	<div class="col-md-3">
 		<div class="card" style="height:255px; overflow-y: scroll;">
 			<div class="card-header">
-				
+				<input type="text" class="form-control" placeholder="Search User..." autocomplete="off" onkeyup="search_user('{{ Auth::id() }}', this.value);" />
 			</div>
 			<div class="card-body">
 				<div id="search_people_area" class="mt-3"></div>
@@ -89,7 +89,7 @@ var to_user_id = "";
 
 conn.onopen = function(e){
 
-	console.log("Connection established!");
+	console.log("Done");
 
 	load_unconnected_user(from_user_id);
 
@@ -99,7 +99,7 @@ conn.onmessage = function(e){
 
 	var data = JSON.parse(e.data);
 
-	if(data.response_load_unconnected_user)
+	if(data.response_load_unconnected_user|| data.response_search_user)
 	{
 		var html = '';
 
@@ -152,6 +152,24 @@ function load_unconnected_user(from_user_id)
 	};
 
 	conn.send(JSON.stringify(data));
+}
+
+function search_user(from_user_id, search_query)
+{
+	if(search_query.length > 0)
+	{
+		var data = {
+			from_user_id : from_user_id,
+			search_query : search_query,
+			type : 'request_search_user'
+		};
+
+		conn.send(JSON.stringify(data));
+	}
+	else
+	{
+		load_unconnected_user(from_user_id);
+	}
 }
 
 
