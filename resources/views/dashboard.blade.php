@@ -125,7 +125,7 @@ conn.onmessage = function(e){
 					<div class="row">
 						<div class="col col-9">`+user_image+`&nbsp;`+data.data[count].name+`</div>
 						<div class="col col-3">
-							<button type="button" name="send_request" class="btn btn-primary btn-sm float-end"><i class="fas fa-paper-plane"></i></button>
+							<button type="button" name="send_request" class="btn btn-primary btn-sm float-end" onclick="send_request(this, `+from_user_id+`, `+data.data[count].id+`)"><i class="fas fa-paper-plane"></i></button>
 						</div>
 					</div>
 				</li>
@@ -140,6 +140,11 @@ conn.onmessage = function(e){
 		}
 
 		document.getElementById('search_people_area').innerHTML = html;
+	}
+
+	if(data.response_from_user_chat_request)
+	{
+		//search_user(from_user_id, document.getElementById('search_people').value);
 	}
 
 };
@@ -170,6 +175,19 @@ function search_user(from_user_id, search_query)
 	{
 		load_unconnected_user(from_user_id);
 	}
+}
+
+function send_request(element, from_user_id, to_user_id)
+{
+	var data = {
+		from_user_id : from_user_id,
+		to_user_id : to_user_id,
+		type : 'request_chat_user'
+	};
+
+	element.disabled = true;
+
+	conn.send(JSON.stringify(data));
 }
 
 
