@@ -226,6 +226,32 @@ class SocketController extends Controller implements MessageComponentInterface
                     }
                 }
             }
+
+            if($data->type == 'request_process_chat_request')
+            {
+                Chat_request::where('id', $data->chat_request_id)->update(['status' => $data->action]);
+
+                $sender_connection_id = User::select('connection_id')->where('id', $data->from_user_id)->get();
+
+                $receiver_connection_id = User::select('connection_id')->where('id', $data->to_user_id)->get();
+
+                foreach($this->clients as $client)
+                {
+                    $send_data['response_process_chat_request'] = true;
+
+                    if($client->resourceId == $sender_connection_id[0]->connection_id)
+                    {
+                        $send_data['data'] = $data->from_user_id;
+                    }
+
+                    if($client->resourceId == $receiver_connection_id[0]->connection_id)
+                    {
+                        $send_data['data'] = $data->to_user_id;
+                    }
+
+                    $client->send(json_encode($send_data));
+                }
+            }
         }
     }
 
