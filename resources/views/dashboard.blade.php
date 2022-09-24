@@ -12,7 +12,7 @@
 	<div class="col-md-3">
 		<div class="card">
 			<div class="card-header"><b>Connected User</b></div>
-			<div class="card-body">
+			<div class="card-body" id="user_list">
 				
 			</div>
 		</div>
@@ -95,6 +95,8 @@ conn.onopen = function(e){
 
 	load_unread_notification(from_user_id);
 
+	load_connected_chat_user(from_user_id);
+
 };
 
 conn.onmessage = function(e){
@@ -153,7 +155,6 @@ conn.onmessage = function(e){
 
 	if(data.response_to_user_chat_request)
 	{
-		console.log(data);
 		load_unread_notification(data.user_id);
 	}
 
@@ -216,8 +217,50 @@ conn.onmessage = function(e){
 
 	if(data.response_process_chat_request)
 	{
-		console.log(data.data);
 		load_unread_notification(data.data);
+
+		load_connected_chat_user(data.data);
+	}
+
+	if(data.response_connected_chat_user)
+	{
+		var html = '<div class="list-group">';
+
+		if(data.data.length > 0)
+		{
+			for(var count = 0; count < data.data.length; count++)
+			{
+				html += `
+				<a href="#" class="list-group-item d-flex justify-content-between align-items-start">
+					<div class="ms-2 me-auto">
+				`;
+
+				var user_image = '';
+
+				if(data.data[count].user_image != null)
+				{
+					user_image = `<img src={{ asset("images/") }}/`+data.data[count].user_image+` width="35" class="rounded-circle" />`;
+				}
+				else
+				{
+					user_image = `<img src="{{ asset('images/no-image.jpg') }}" width="35" class="rounded-circle" />`
+				}
+
+				html += `
+						&nbsp; `+user_image+`&nbsp;<b>`+data.data[count].name+`</b>
+					</div>
+				</a>
+				`;
+			}
+		}
+		else
+		{
+			html += 'No User Found';
+		}
+
+		html += '</div>';
+
+		document.getElementById('user_list').innerHTML = html;
 	}
 
 };
@@ -282,6 +325,16 @@ function process_chat_request(chat_request_id, from_user_id, to_user_id, action)
 		to_user_id : to_user_id,
 		action : action,
 		type : 'request_process_chat_request'
+	};
+
+	conn.send(JSON.stringify(data));
+}
+
+function load_connected_chat_user(from_user_id)
+{
+	var data = {
+		from_user_id : from_user_id,
+		type : 'request_connected_chat_user'
 	};
 
 	conn.send(JSON.stringify(data));
