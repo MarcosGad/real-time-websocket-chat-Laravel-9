@@ -9,7 +9,7 @@
 @endif
 
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-sm-4 col-lg-3">
 		<div class="card">
 			<div class="card-header"><b>Connected User</b></div>
 			<div class="card-body" id="user_list">
@@ -17,20 +17,20 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-md-6">
+	<div class="col-sm-4 col-lg-6">
 		<div class="card">
 			<div class="card-header">
 				<div class="row">
-					<div class="col col-md-6"><b>Chat Area</b></div>
-					<div class="col col-md-6"></div>
+					<div class="col col-md-6" id="chat_header"><b>Chat Area</b></div>
+					<div class="col col-md-6" id="close_chat_area"></div>
 				</div>
 			</div>
-			<div class="card-body">
+			<div class="card-body" id="chat_area">
 				
 			</div>
 		</div>
 	</div>
-	<div class="col-md-3">
+	<div class="col-sm-4 col-lg-3">
 		<div class="card" style="height:255px; overflow-y: scroll;">
 			<div class="card-header">
 				<input type="text" class="form-control" placeholder="Search User..." autocomplete="off" id="search_people" onkeyup="search_user('{{ Auth::id() }}', this.value);" />
@@ -231,7 +231,7 @@ conn.onmessage = function(e){
 			for(var count = 0; count < data.data.length; count++)
 			{
 				html += `
-				<a href="#" class="list-group-item d-flex justify-content-between align-items-start">
+				<a href="#" class="list-group-item d-flex justify-content-between align-items-start" onclick="make_chat_area('`+data.data[count].name+`');">
 					<div class="ms-2 me-auto">
 				`;
 
@@ -340,7 +340,33 @@ function load_connected_chat_user(from_user_id)
 	conn.send(JSON.stringify(data));
 }
 
+function make_chat_area(to_user_name)
+{
+	var html = `
+	<div id="chat_history"></div>
+	<div class="input-group mb-3">
+		<textarea id="message_area" class="form-control" aria-describedby="send_button"></textarea>
+		<button type="button" class="btn btn-success" id="send_button"><i class="fas fa-paper-plane"></i></button>
+	</div>
+	`;
 
+	document.getElementById('chat_area').innerHTML = html;
+
+	document.getElementById('chat_header').innerHTML = 'Chat with <b>'+to_user_name+'</b>';
+
+	document.getElementById('close_chat_area').innerHTML = '<button type="button" id="close_chat" class="btn btn-danger btn-sm float-end" onclick="close_chat();"><i class="fas fa-times"></i></button>'
+}
+
+function close_chat()
+{
+	document.getElementById('chat_header').innerHTML = 'Chat Area';
+
+	document.getElementById('close_chat_area').innerHTML = '';
+
+	document.getElementById('chat_area').innerHTML = '';
+
+	to_user_id = '';
+}
 
 
 </script>
