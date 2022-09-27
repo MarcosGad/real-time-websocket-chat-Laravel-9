@@ -231,7 +231,7 @@ conn.onmessage = function(e){
 			for(var count = 0; count < data.data.length; count++)
 			{
 				html += `
-				<a href="#" class="list-group-item d-flex justify-content-between align-items-start" onclick="make_chat_area('`+data.data[count].name+`');">
+				<a href="#" class="list-group-item d-flex justify-content-between align-items-start" onclick="make_chat_area(`+data.data[count].id+`, '`+data.data[count].name+`');">
 					<div class="ms-2 me-auto">
 				`;
 
@@ -261,6 +261,42 @@ conn.onmessage = function(e){
 		html += '</div>';
 
 		document.getElementById('user_list').innerHTML = html;
+	}
+
+	if(data.message)
+	{
+		var html = '';
+
+		if(data.from_user_id == from_user_id)
+		{
+			html += `
+			<div class="row">
+				<div class="col col-3">&nbsp;</div>
+				<div class="col col-9 alert alert-success text-dark shadow-sm">
+					`+data.message+`
+				</div>
+			</div>
+			`;
+		}
+		else
+		{
+			html += `
+			<div class="row">
+				<div class="col col-9 alert alert-light text-dark shadow-sm">
+				`+data.message+`
+				</div>
+			</div>
+			`;
+		}
+
+		if(html != '')
+		{
+			var previous_chat_element = document.querySelector('#chat_history');
+
+			var chat_history_element = document.querySelector('#chat_history');
+
+			chat_history_element.innerHTML = previous_chat_element.innerHTML + html;
+		}
 	}
 
 };
@@ -340,13 +376,13 @@ function load_connected_chat_user(from_user_id)
 	conn.send(JSON.stringify(data));
 }
 
-function make_chat_area(to_user_name)
+function make_chat_area(user_id, to_user_name)
 {
 	var html = `
 	<div id="chat_history"></div>
 	<div class="input-group mb-3">
 		<textarea id="message_area" class="form-control" aria-describedby="send_button"></textarea>
-		<button type="button" class="btn btn-success" id="send_button"><i class="fas fa-paper-plane"></i></button>
+		<button type="button" class="btn btn-success" id="send_button" onclick="send_chat_message()"><i class="fas fa-paper-plane"></i></button>
 	</div>
 	`;
 
@@ -354,7 +390,9 @@ function make_chat_area(to_user_name)
 
 	document.getElementById('chat_header').innerHTML = 'Chat with <b>'+to_user_name+'</b>';
 
-	document.getElementById('close_chat_area').innerHTML = '<button type="button" id="close_chat" class="btn btn-danger btn-sm float-end" onclick="close_chat();"><i class="fas fa-times"></i></button>'
+	document.getElementById('close_chat_area').innerHTML = '<button type="button" id="close_chat" class="btn btn-danger btn-sm float-end" onclick="close_chat();"><i class="fas fa-times"></i></button>';
+
+	to_user_id = user_id;	
 }
 
 function close_chat()
@@ -366,6 +404,27 @@ function close_chat()
 	document.getElementById('chat_area').innerHTML = '';
 
 	to_user_id = '';
+}
+
+
+function send_chat_message()
+{
+	document.querySelector('#send_button').disabled = true;
+
+	var message = document.getElementById('message_area').value.trim();
+
+	var data = {
+		message : message,
+		from_user_id : from_user_id,
+		to_user_id : to_user_id,
+		type : 'request_send_message'
+	};
+
+	conn.send(JSON.stringify(data));
+
+	document.querySelector('#message_area').value = '';
+
+	document.querySelector('#send_button').disabled = false;
 }
 
 
