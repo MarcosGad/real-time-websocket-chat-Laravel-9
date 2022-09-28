@@ -231,7 +231,7 @@ conn.onmessage = function(e){
 			for(var count = 0; count < data.data.length; count++)
 			{
 				html += `
-				<a href="#" class="list-group-item d-flex justify-content-between align-items-start" onclick="make_chat_area(`+data.data[count].id+`, '`+data.data[count].name+`');">
+				<a href="#" class="list-group-item d-flex justify-content-between align-items-start" onclick="make_chat_area(`+data.data[count].id+`, '`+data.data[count].name+`'); load_chat_data(`+from_user_id+`, `+data.data[count].id+`); ">
 					<div class="ms-2 me-auto">
 				`;
 
@@ -299,7 +299,46 @@ conn.onmessage = function(e){
 		}
 	}
 
+	if(data.chat_history)
+	{
+		var html = '';
+
+		for(var count = 0; count < data.chat_history.length; count++)
+		{
+			if(data.chat_history[count].from_user_id == from_user_id)
+			{
+				html +=`
+				<div class="row">
+					<div class="col col-3">&nbsp;</div>
+					<div class="col col-9 alert alert-success text-dark shadow-sm">
+					`+data.chat_history[count].chat_message+`
+					</div>
+				</div>
+				`;
+			}
+			else
+			{
+				html += `
+				<div class="row">
+					<div class="col col-9 alert alert-light text-dark shadow-sm">
+					`+data.chat_history[count].chat_message+`
+					</div>
+				</div>
+				`;
+			}
+		}
+
+		document.querySelector('#chat_history').innerHTML = html;
+
+		scroll_top();
+	}
+
 };
+
+function scroll_top()
+{
+    document.querySelector('#chat_history').scrollTop = document.querySelector('#chat_history').scrollHeight;
+}
 
 function load_unconnected_user(from_user_id)
 {
@@ -425,6 +464,17 @@ function send_chat_message()
 	document.querySelector('#message_area').value = '';
 
 	document.querySelector('#send_button').disabled = false;
+}
+
+function load_chat_data(from_user_id, to_user_id)
+{
+	var data = {
+		from_user_id : from_user_id,
+		to_user_id : to_user_id,
+		type : 'request_chat_history'
+	};
+
+	conn.send(JSON.stringify(data));
 }
 
 
