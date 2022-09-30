@@ -29,6 +29,8 @@ class SocketController extends Controller implements MessageComponentInterface
         if(isset($queryarray['token']))
         {
             User::where('token', $queryarray['token'])->update([ 'connection_id' => $conn->resourceId ]);
+
+            Chat::where('message_status', 'Not Send')->update(['message_status' =>'Send']);
         }
     }
 
@@ -311,7 +313,6 @@ class SocketController extends Controller implements MessageComponentInterface
 
             if($data->type == 'request_send_message')
             {
-                //save chat message in mysql
 
                 $chat = new Chat;
                 $chat->from_user_id = $data->from_user_id;
@@ -320,9 +321,13 @@ class SocketController extends Controller implements MessageComponentInterface
                 $chat->message_status = 'Not Send';
                 $chat->save();
 
+
+                $chat_message_id = $chat->id;
+
                 $receiver_connection_id = User::select('connection_id')->where('id', $data->to_user_id)->get();
 
                 $sender_connection_id = User::select('connection_id')->where('id', $data->from_user_id)->get();
+
 
                 foreach($this->clients as $client)
                 {
@@ -333,6 +338,17 @@ class SocketController extends Controller implements MessageComponentInterface
                         $send_data['from_user_id'] = $data->from_user_id;
 
                         $send_data['to_user_id'] = $data->to_user_id;
+
+
+                        if($receiver_connection_id[0]->connection_id > 0)
+                        {
+                            Chat::where('id', $chat_message_id)->update(['message_status' =>'Send']);
+                            $send_data['message_status'] = 'Send';
+                        }
+                        else
+                        {
+                            $send_data['message_status'] = 'Not Send';
+                        }
 
                         $client->send(json_encode($send_data));
                     }
